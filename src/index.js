@@ -16,7 +16,7 @@ app.use(express.json())
 
 app.post('/register', function (req, res) {
 	var Register = require('./register')
-	Register = new Register(req.body.login, req.body.password, req.body.email)
+	Register = new Register(req.body.login, req.body.password, req.body.email, req.body.sex)
 	const result = Register.createAccount(Database, (result, error)=>{
 		res.send({
 			data: result,
@@ -25,6 +25,16 @@ app.post('/register', function (req, res) {
 		res.end()
 	})
 	
+})
+
+app.get('/activate/:key', function (req, res) {
+	let Activate = require('./activateAccount')
+	Activate = new Activate(Database)
+	Activate.activate(req.params.key)
+		
+		res.send({
+			data: 'ciapong'
+		})
 })
 
 app.listen(3001)

@@ -16,7 +16,7 @@ class Database {
   syncDatabase(){
     this.sequelize
     .authenticate()
-    .then(async () => {
+    .then(() => {
       console.log('Connection has been established successfully.');
 
       this.UserClass.hasMany(this.ImagesClass, {
@@ -32,10 +32,10 @@ class Database {
       })
 
       this.sequelize.sync({force:true}).then(()=>{
-        this.UserClass.create({
+        /*this.UserClass.create({
           login: 'John',
           email: 'chuj12@wp.pl',
-          password: 'asdsdjyhqwioeuyqoih324y289734y',
+          password: 'asdsdjyhqwioeuyqoih',
           sex: 'm',
           profileImageId: 1
         });
@@ -44,6 +44,7 @@ class Database {
           image: '/9j/4AAQSkZJRgABAQAAAQABAAD//',
           userId: 1
         });
+        */
       })
     })
     .catch(err => {

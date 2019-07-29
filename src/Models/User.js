@@ -8,14 +8,7 @@ var userSync = (Sequelize, sequelize)=>{
       type: Sequelize.INTEGER(11),
       allowNull: false,
       autoIncrement: true,
-      primaryKey: true,
-      len: [6,20]
-    },
-    login: {
-      type: Sequelize.STRING,
-      allowNull: false,
-      unique: true,
-      len: [6,20]
+      primaryKey: true
     },
     email: {
       type: Sequelize.STRING,
@@ -23,22 +16,31 @@ var userSync = (Sequelize, sequelize)=>{
       unique: true,
       validate: {
         isEmail: true,
-        len: [6,20]
+        len: [1,40]
       }
       // allowNull defaults to true
+    },
+     login: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      unique: true,
+      validate: {
+        len: [1,20]
+      }
     },
     password: {
       type: Sequelize.STRING,
       allowNull: false,
-      len: [6,20]
+      validate: {
+        len: [6,20]
+      }
       // allowNull defaults to true
     },
     sex: {
       type: Sequelize.STRING,
       allowNull: false,
       validate: {
-        isIn: [['m', 'w']],
-        len: 1
+        isIn: [['m', 'w']]
       }
     },
     active: {
