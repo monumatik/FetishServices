@@ -16,7 +16,7 @@ var userSync = (Sequelize, sequelize)=>{
     }
   }, {
     sequelize,
-    modelName: 'images'
+    modelName: Images.name
     // options
   });
 

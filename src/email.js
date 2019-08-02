@@ -8,12 +8,12 @@ let transporter = nodemailer.createTransport({
   }
 });
 
-function sendActivationLink(address, link){
+function sendActivationLink(address, login, password, link){
 	let mailOptions = {
 	  from: 'patrykslu1@gmail.com',
 	  to: address,
-	  subject: 'Aktywuj konto szmato pierdolona nooooooooo !',
-	  text: `${link}`
+	  subject: 'Fetish - Aktywacja konta',
+	  html: `<h3>Witamy w społeczności Fetish</h3><p>Twoje konto:</p><p>Login: ${login}</p><p>Hasło: ${password}</p><p>Aby aktywować konto kliknij w poniższy link (link aktywacyjny aktywny jest przez 24H):</p><p>${link}</p>`
 	};
 
 
@@ -26,12 +26,12 @@ function sendActivationLink(address, link){
 	});
 }
 
-function accountActivated(address){
+function accountResetLink(address, link){
 	let mailOptions = {
 	  from: 'patrykslu1@gmail.com',
 	  to: address,
-	  subject: 'Konto aktywowane kurwa kurwiuuuuuuuuu!!!!!',
-	  text: `Chcialibymymymy informnąć że możesz szukać ruchania na fetyszku nonono.`
+	  subject: 'Fetish - zmiana hasła',
+	  html: `http://localhost:3001/resetconfirmed/${link}`
 	};
 
 
@@ -46,5 +46,5 @@ function accountActivated(address){
 
 module.exports = {
 	sendActivationLink: sendActivationLink,
-	accountActivated: accountActivated
+	accountResetLink: accountResetLink
 }

@@ -2,8 +2,8 @@ var userSync = (Sequelize, sequelize)=>{
  
   const Model = Sequelize.Model;
 
-  class User extends Model {}
-  User.init({
+  class Users extends Model {}
+  Users.init({
     id:{
       type: Sequelize.INTEGER(11),
       allowNull: false,
@@ -32,16 +32,9 @@ var userSync = (Sequelize, sequelize)=>{
       type: Sequelize.STRING,
       allowNull: false,
       validate: {
-        len: [6,20]
+        len: [6,32]
       }
       // allowNull defaults to true
-    },
-    sex: {
-      type: Sequelize.STRING,
-      allowNull: false,
-      validate: {
-        isIn: [['m', 'w']]
-      }
     },
     active: {
       type: Sequelize.BOOLEAN,
@@ -50,11 +43,18 @@ var userSync = (Sequelize, sequelize)=>{
     }
   }, {
     sequelize,
-    modelName: 'user'
+    hooks: {
+      afterValidate: (users, options)=>{
+        const sugar = require('../sugar')
+        const md5 = require('md5')
+        users.password = md5(`${users.password}${sugar.activationLinkSugar}`)
+      }
+    },
+    modelName: Users.name
     // options
   });
 
-  return User
+  return Users
 }
 
 module.exports = userSync;

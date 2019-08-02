@@ -7,22 +7,20 @@ class Database {
       schema: 'g' /* one of 'mysql' | 'mariadb' | 'postgres' | 'mssql' */
     });
 
-    const User = require('./Models/User.js')
-    this.UserClass = User(this.Sequelize, this.sequelize)
+    const Users = require('./Models/Users.js')
+    Users(this.Sequelize, this.sequelize)
     const Images = require('./Models/Images.js')
-    this.ImagesClass = Images(this.Sequelize, this.sequelize)
+    Images(this.Sequelize, this.sequelize)
   }
 
   syncDatabase(){
     this.sequelize
     .authenticate()
     .then(() => {
-      console.log('Connection has been established successfully.');
-
-      this.UserClass.hasMany(this.ImagesClass, {
+      this.sequelize.models.Users.hasMany(this.sequelize.models.Images, {
         as: 'userId'
       })
-      this.UserClass.belongsTo(this.ImagesClass, {
+      this.sequelize.models.Users.belongsTo(this.sequelize.models.Users, {
         as: 'Current',
         foreignKey: {
           name: 'profileImageId',
@@ -31,15 +29,16 @@ class Database {
         constraints: false
       })
 
-      this.sequelize.sync({force:true}).then(()=>{
-        /*this.UserClass.create({
+      this.sequelize.sync({force:false})
+      .then(()=>{
+        /*
+        this.UsersClass.create({
           login: 'John',
-          email: 'chuj12@wp.pl',
+          email: 'luminousshadowpl@gmail.com',
           password: 'asdsdjyhqwioeuyqoih',
-          sex: 'm',
           profileImageId: 1
         });
-
+        
         this.ImagesClass.create({
           image: '/9j/4AAQSkZJRgABAQAAAQABAAD//',
           userId: 1
