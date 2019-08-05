@@ -9,13 +9,12 @@ class Account {
 		const md5 = require('md5');
 		const sugar = require('./sugar')
 			this.database.sequelize.models.Users.create({
-				login: login,
-				password: password,
-				email: email
+				login: login.replace(' ',''),
+				password: password.replace(' ',''),
+				email: email.replace(' ','')
 			})
 			.then((data) => {
 				const email = require('./email')
-				console.log(sugar)
 				const _md5 = md5(data.dataValues.id+data.dataValues.login+data.dataValues.password+sugar.activationLinkSugar)
 				const link = `http://localhost:3001/activate/${_md5}`
 				email.sendActivationLink(data.dataValues.email, login, password, link)
@@ -99,7 +98,7 @@ class Account {
 		if(password === confirmPassword){
 			const sugar = require('./sugar')
 			this.database.sequelize.models.Users.update(
-				{ password: password },
+				{ password: password.replace(' ','') },
 				{ where: { password: this.database.Sequelize.where(
 					this.database.Sequelize.fn('MD5', 
 						this.database.Sequelize.fn('concat', 
