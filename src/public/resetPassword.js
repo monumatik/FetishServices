@@ -147,6 +147,7 @@ return `<!DOCTYPE html>
 			padding:10px; 
 		    justify-content: center;
 		    color: red;
+		    font-size: 14px;
 		}
 
 		.infoBox {
@@ -155,6 +156,7 @@ return `<!DOCTYPE html>
 		    justify-content: center;
 		    color: green;
 		    text-align: center;
+		    font-size: 14px;
 		}
 
 		@media screen and (max-height: 480px){

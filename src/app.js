@@ -4,6 +4,7 @@ class Database {
     this.sequelize = new this.Sequelize('Fetish', 'postgres', 'dupadupa', {
       host: 'localhost',
       dialect: 'postgres',
+      port: 5433,
       schema: 'g' /* one of 'mysql' | 'mariadb' | 'postgres' | 'mssql' */
     });
 
