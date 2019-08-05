@@ -21,7 +21,7 @@ app.post('/register', function (req, res) {
 	Account.createAccount(req.body.login, req.body.password, req.body.email, (result, error)=>{
 		res.send({
 			data: result,
-			error: error,
+			error: error
 		})
 	})
 })
