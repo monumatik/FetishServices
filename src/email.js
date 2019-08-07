@@ -8,7 +8,11 @@ let transporter = nodemailer.createTransport({
   }
 });
 
-function sendActivationLink(address, login, password, link){
+function sendActivationLink(data, address, login, password){
+	const md5 = require('md5');
+	const sugar = require('./sugar')
+	const _md5 = md5(data.dataValues.id+data.dataValues.login+data.dataValues.password+sugar.activationLinkSugar)
+	const link = `http://localhost:3001/activate/${_md5}`
 	let mailOptions = {
 	  from: 'patrykslu1@gmail.com',
 	  to: address,

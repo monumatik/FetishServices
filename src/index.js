@@ -16,12 +16,27 @@ app.use(cors(corsOptions))
 app.use(express.json())
 
 app.post('/register', function (req, res) {
+	const email = require('./email')
+	var Account = require('./account')
+	const Text = require('./text')
+	Account = new Account(Database)
+	Account.createAccount(req.body.login, req.body.password, req.body.email, (data)=>{
+		email.sendActivationLink(data)
+		res.send({
+			data: Text.accountCreated,
+			error: error
+		})
+	})
+})
+
+app.post('/login', function(req, res) {
+	const email = require('./email')
 	var Account = require('./account')
 	Account = new Account(Database)
-	Account.createAccount(req.body.login, req.body.password, req.body.email, (result, error)=>{
+	Account.login(req.body.login, req.body.password, (data, error)=>{
 		res.send({
-			data: result,
-			error: error
+			data: data,
+			result: error
 		})
 	})
 })

@@ -5,20 +5,15 @@ class Account {
 
 	createAccount(login, password, email, callback){
 		let result;
-		const Text = require('./text')
-		const md5 = require('md5');
-		const sugar = require('./sugar')
+		
 			this.database.sequelize.models.Users.create({
 				login: login.replace(' ',''),
 				password: password.replace(' ',''),
 				email: email.replace(' ','')
 			})
 			.then((data) => {
-				const email = require('./email')
-				const _md5 = md5(data.dataValues.id+data.dataValues.login+data.dataValues.password+sugar.activationLinkSugar)
-				const link = `http://localhost:3001/activate/${_md5}`
-				email.sendActivationLink(data.dataValues.email, login, password, link)
-				callback(Text.accountCreated, null)
+				console.log(data)
+				callback(data)
 			})
 			.catch(this.database.Sequelize.UniqueConstraintError, (err)=>{
 				switch(err.parent.constraint.toLowerCase()){
@@ -120,6 +115,23 @@ class Account {
 		}else{
 			callback(null, text.passwordsDifferent)
 		}
+	}
+
+	login(loginOrEmail, password, callback){
+		const text = require('./text')
+		const sugar = require('./sugar')
+		this.database.sequelize.models.Users.findOne({
+			where: {
+				[this.database.Sequelize.Op.or] : [{email: loginOrEmail}, {login: loginOrEmail}],
+				password: `password`,
+				active: true
+			}
+		})
+		.then(data => {
+			console.log(data)
+			callback('', '')
+		})
+		.catch(err=>console.log(err))
 	}
 
 }

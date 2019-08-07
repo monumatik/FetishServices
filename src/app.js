@@ -4,7 +4,7 @@ class Database {
     this.sequelize = new this.Sequelize('Fetish', 'postgres', 'dupadupa', {
       host: 'localhost',
       dialect: 'postgres',
-      port: 5433,
+      port: 5432,
       schema: 'g' /* one of 'mysql' | 'mariadb' | 'postgres' | 'mssql' */
     });
 
@@ -30,7 +30,7 @@ class Database {
         constraints: false
       })
 
-      this.sequelize.sync({force:false})
+      this.sequelize.sync({force:true})
       .then(()=>{
         /*
         this.UsersClass.create({
