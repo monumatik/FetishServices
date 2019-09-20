@@ -4,20 +4,21 @@ let transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'patrykslu1@gmail.com',
-    pass: 'patryk1901'
+    pass: 'Monumatik2019'
   }
 });
 
-function sendActivationLink(data, address, login, password){
+function sendActivationLink(data){
 	const md5 = require('md5');
 	const sugar = require('./sugar')
-	const _md5 = md5(data.dataValues.id+data.dataValues.login+data.dataValues.password+sugar.activationLinkSugar)
+	console.log(data)
+	const _md5 = md5(data.id+data.login+data.password+sugar.activationLinkSugar)
 	const link = `http://localhost:3001/activate/${_md5}`
 	let mailOptions = {
 	  from: 'patrykslu1@gmail.com',
-	  to: address,
+	  to: data.email,
 	  subject: 'Fetish - Aktywacja konta',
-	  html: `<h3>Witamy w społeczności Fetish</h3><p>Twoje konto:</p><p>Login: ${login}</p><p>Hasło: ${password}</p><p>Aby aktywować konto kliknij w poniższy link (link aktywacyjny aktywny jest przez 24H):</p><p>${link}</p>`
+	  html: `<h3>Witamy w społeczności Fetish</h3><p>Twoje konto:</p><p>Login: ${data.login}</p><p>Hasło: ${data.password}</p><p>Aby aktywować konto kliknij w poniższy link (link aktywacyjny aktywny jest przez 24H):</p><p>${link}</p>`
 	};
 
 

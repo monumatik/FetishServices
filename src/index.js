@@ -20,8 +20,8 @@ app.post('/register', function (req, res) {
 	var Account = require('./account')
 	const Text = require('./text')
 	Account = new Account(Database)
-	Account.createAccount(req.body.login, req.body.password, req.body.email, (data)=>{
-		email.sendActivationLink(data)
+	Account.createAccount(req.body.login, req.body.password, req.body.email, (data, error)=>{
+		email.sendActivationLink(data.dataValues)
 		res.send({
 			data: Text.accountCreated,
 			error: error
@@ -45,7 +45,7 @@ app.get('/activate/:key', function (req, res) {
 	let Account = require('./account')
 	Account = new Account(Database)
 	Account.activate(req.params.key)
-	let html = require('./public/resetPassword')
+	let html = require('./public/activationLink')
 	res.send(html);
 })
 

@@ -12,8 +12,7 @@ class Account {
 				email: email.replace(' ','')
 			})
 			.then((data) => {
-				console.log(data)
-				callback(data)
+				callback(data, null)
 			})
 			.catch(this.database.Sequelize.UniqueConstraintError, (err)=>{
 				switch(err.parent.constraint.toLowerCase()){
