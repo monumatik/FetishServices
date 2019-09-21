@@ -30,7 +30,7 @@ class Database {
         constraints: false
       })
 
-      this.sequelize.sync({force:true})
+      this.sequelize.sync({force:false})
       .then(()=>{
         /*
         this.UsersClass.create({

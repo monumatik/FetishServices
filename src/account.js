@@ -1,29 +1,39 @@
 class Account {
-	constructor(database){
-		this.database = database	
+	constructor(database, text){
+		this.database = database
+		this.text = text
 	}
 
-	createAccount(login, password, email, callback){
+	createAccount(user, callback){
 		let result;
-		
 			this.database.sequelize.models.Users.create({
-				login: login.replace(' ',''),
-				password: password.replace(' ',''),
-				email: email.replace(' ','')
+				login: user.login.replace(' ',''),
+				password: user.password.replace(' ',''),
+				email: user.email.replace(' ','')
 			})
 			.then((data) => {
-				callback(data, null)
+				console.log(data)
+				callback({
+					data: this.text.accountCreated,
+					error: null,
+					account: {
+						id: data.dataValues.id,
+						login: data.dataValues.login,
+						password: data.dataValues.password,
+						email: data.dataValues.email,
+					}
+				})
 			})
 			.catch(this.database.Sequelize.UniqueConstraintError, (err)=>{
 				switch(err.parent.constraint.toLowerCase()){
 					case 'users_email_key':
-						callback(null, Text.emailExists)
+						callback(null, this.text.emailExists)
 						break;
 					case 'users_login_key':
-						callback(null, Text.userExists)
+						callback(null, this.text.userExists)
 						break;
 					default:
-						callback(null, Text.unexpectedError)
+						callback(null, this.text.unexpectedError)
 				}
 			})
 			.catch(this.database.Sequelize.ValidationError, (err)=>{
@@ -32,21 +42,30 @@ class Account {
 					if(err.errors[key].path === 'password'){
 						switch(err.errors[key].validatorKey){
 							case 'len':
-								callback(null, Text.passwordRequirements)
+								callback({
+									data: null,
+									error: this.text.passwordRequirements
+								})
 								breakLoop = true
 								break;
 						}
 					}else if(err.errors[key].path === 'login'){
 						switch(err.errors[key].validatorKey.toLowerCase()){
 							case 'len':
-								callback(null, Text.loginRequirements)
+								callback({
+									data: null,
+									error: this.text.loginRequirements
+								})
 								breakLoop = true
 								break;
 						}
 					}else if(err.errors[key].path === 'email'){
 						switch(err.errors[key].validatorKey.toLowerCase()){
-							case 'isEmail':
-								callback(null, Text.emailRequirements)
+							case 'isemail':
+								callback({
+									data: null,
+									error: this.text.emailRequirements
+								})
 								breakLoop = true
 								break;
 						}
@@ -55,7 +74,10 @@ class Account {
 						break;
 				}
 				if(!breakLoop)
-					callback(null, Text.unexpectedError)
+					callback({
+						data: null, 
+						error: this.text.unexpectedError
+					})
 			})
 	}
 
@@ -88,7 +110,6 @@ class Account {
 	}
 
 	setPassword(password, confirmPassword, key, callback){
-		const text = require('./text')
 		if(password === confirmPassword){
 			const sugar = require('./sugar')
 			this.database.sequelize.models.Users.update(
@@ -117,7 +138,6 @@ class Account {
 	}
 
 	login(loginOrEmail, password, callback){
-		const text = require('./text')
 		const sugar = require('./sugar')
 		this.database.sequelize.models.Users.findOne({
 			where: {
@@ -130,7 +150,14 @@ class Account {
 			console.log(data)
 			callback('', '')
 		})
-		.catch(err=>console.log(err))
+		.catch(err=>{
+			console.log(err)
+			callback({
+				data: null,
+				error: ""
+			})
+		})
+		
 	}
 
 }

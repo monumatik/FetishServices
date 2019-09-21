@@ -8,17 +8,17 @@ let transporter = nodemailer.createTransport({
   }
 });
 
-function sendActivationLink(data){
+function sendActivationLink(_object){
+	console.log(_object)
 	const md5 = require('md5');
 	const sugar = require('./sugar')
-	console.log(data)
-	const _md5 = md5(data.id+data.login+data.password+sugar.activationLinkSugar)
-	const link = `http://localhost:3001/activate/${_md5}`
+	const _md5 = md5(_object.id+_object.login+_object.password+sugar.activationLinkSugar)
+	const link = `http://192.168.8.186:3001/activate/${_md5}`
 	let mailOptions = {
 	  from: 'patrykslu1@gmail.com',
-	  to: data.email,
+	  to: _object.email,
 	  subject: 'Fetish - Aktywacja konta',
-	  html: `<h3>Witamy w społeczności Fetish</h3><p>Twoje konto:</p><p>Login: ${data.login}</p><p>Hasło: ${data.password}</p><p>Aby aktywować konto kliknij w poniższy link (link aktywacyjny aktywny jest przez 24H):</p><p>${link}</p>`
+	  html: `<h3>Witamy w społeczności Fetish</h3><p>Twoje konto:</p><p>Login: ${_object.login}</p><p>Aby aktywować konto kliknij w poniższy link (link aktywacyjny aktywny jest przez 24H):</p><p>${link}</p>`
 	};
 
 
@@ -36,7 +36,7 @@ function accountResetLink(address, link){
 	  from: 'patrykslu1@gmail.com',
 	  to: address,
 	  subject: 'Fetish - zmiana hasła',
-	  html: `http://localhost:3001/resetconfirmed/${link}`
+	  html: `http://192.168.8.186:3001/resetconfirmed/${link}`
 	};
 
 

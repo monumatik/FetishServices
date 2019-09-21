@@ -6,9 +6,13 @@ const path = require('path');
 var Database = require('./app')
 var Database = new Database()
 Database.syncDatabase()
+var Account = require('./account')
+const Text = require('./text')
+Account = new Account(Database, Text)
+var email = require('./email')
 
 var corsOptions = {
-  origin: 'http://localhost:3000',
+  origin: '*',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
@@ -16,34 +20,35 @@ app.use(cors(corsOptions))
 app.use(express.json())
 
 app.post('/register', function (req, res) {
-	const email = require('./email')
-	var Account = require('./account')
-	const Text = require('./text')
-	Account = new Account(Database)
-	Account.createAccount(req.body.login, req.body.password, req.body.email, (data, error)=>{
-		email.sendActivationLink(data.dataValues)
+	Account.createAccount({
+		login: req.body.login, 
+		password: req.body.password, 
+		email: req.body.email
+	},
+	(_object)=>{
+		_object.data !== null ? email.sendActivationLink(_object.account) : {};
 		res.send({
-			data: Text.accountCreated,
-			error: error
+			data: _object.data, 
+			error: _object.error
 		})
 	})
 })
 
 app.post('/login', function(req, res) {
-	const email = require('./email')
-	var Account = require('./account')
-	Account = new Account(Database)
-	Account.login(req.body.login, req.body.password, (data, error)=>{
+	Account.login({
+		login: req.body.login, 
+		password: req.body.password
+	},
+	(_object)=>{
+		if(_object.data)
 		res.send({
-			data: data,
-			result: error
+			data: _object.data,
+			result: _object.error
 		})
 	})
 })
 
 app.get('/activate/:key', function (req, res) {
-	let Account = require('./account')
-	Account = new Account(Database)
 	Account.activate(req.params.key)
 	let html = require('./public/activationLink')
 	res.send(html);
@@ -81,4 +86,4 @@ app.post('/resetPassword/:key', function (req, res) { //dla formularza z nowym h
 	})
 })
 
-app.listen(3001)
+app.listen(3001, '0.0.0.0')
