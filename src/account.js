@@ -137,7 +137,7 @@ class Account {
 		}
 	}
 
-	login(loginOrEmail, password, callback){
+	login(_object, callback){
 		const sugar = require('./sugar')
 		this.database.sequelize.models.Users.findOne({
 			where: {
