@@ -1,21 +1,23 @@
-const hmacSha256 = require('crypto-js/hmac-sha256');
-const base64url = require('base64url');
-
-const header = {
-    typ: 'JWT',
-    alg: 'HS256'
-};
- 
-const payload = {
-    id: 123,
-};
- 
+const jwt = require('jsonwebtoken');
 const secret = 'NieróbScenDamianRatajczak';
- 
-const jwtToken = base64UrlEncode(header) + '.' + base64UrlEncode(payload);
-const signature = base64url.encode(hmacSha256(jwtToken, secret).toString());
-const jwtSignedToken = jwtToken + '.' + signature;
- 
-function base64UrlEncode(item) {
-    return base64url.encode(JSON.stringify(item));
-};
+
+class Authorization {
+	static getToken(_obj){
+		var token = jwt.sign(_obj.payload, secret);
+		return token
+	}
+
+	static validateToken(_obj){
+		var payload = null
+		var error = null
+		try{
+			payload = jwt.verify(_obj.token, secret)
+		}catch(err){
+			error = err
+		}	
+	
+		return { payload: payload, error: err }
+	}
+}
+
+module.exports = Authorization;

@@ -30,21 +30,22 @@ class Database {
         constraints: false
       })
 
-      this.sequelize.sync({force:false})
+      this.sequelize.sync({force:true})
       .then(()=>{
-        /*
-        this.UsersClass.create({
-          login: 'John',
+        
+        this.sequelize.models.Users.create({
+          login: 'zbok',
           email: 'luminousshadowpl@gmail.com',
-          password: 'asdsdjyhqwioeuyqoih',
-          profileImageId: 1
+          password: 'asdasdasd',
+          profileImageId: 1,
+          active: true
         });
         
-        this.ImagesClass.create({
+        this.sequelize.models.Images.create({
           image: '/9j/4AAQSkZJRgABAQAAAQABAAD//',
           userId: 1
         });
-        */
+        
       })
     })
     .catch(err => {

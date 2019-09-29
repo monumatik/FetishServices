@@ -1,20 +1,24 @@
+var database;
+const text = require('./text')
+const sugar = require('./sugar')
+const auth = require('./auth')
+
+
 class Account {
-	constructor(database, text){
-		this.database = database
-		this.text = text
+	constructor(db){
+		database = db
 	}
 
 	createAccount(user, callback){
 		let result;
-			this.database.sequelize.models.Users.create({
+			database.sequelize.models.Users.create({
 				login: user.login.replace(' ',''),
 				password: user.password.replace(' ',''),
 				email: user.email.replace(' ','')
 			})
 			.then((data) => {
-				console.log(data)
 				callback({
-					data: this.text.accountCreated,
+					data: text.accountCreated,
 					error: null,
 					account: {
 						id: data.dataValues.id,
@@ -24,19 +28,19 @@ class Account {
 					}
 				})
 			})
-			.catch(this.database.Sequelize.UniqueConstraintError, (err)=>{
+			.catch(database.Sequelize.UniqueConstraintError, (err)=>{
 				switch(err.parent.constraint.toLowerCase()){
 					case 'users_email_key':
-						callback(null, this.text.emailExists)
+						callback(null, text.emailExists)
 						break;
 					case 'users_login_key':
-						callback(null, this.text.userExists)
+						callback(null, text.userExists)
 						break;
 					default:
-						callback(null, this.text.unexpectedError)
+						callback(null, text.unexpectedError)
 				}
 			})
-			.catch(this.database.Sequelize.ValidationError, (err)=>{
+			.catch(database.Sequelize.ValidationError, (err)=>{
 				let breakLoop = false
 				for(let key in err.errors){
 					if(err.errors[key].path === 'password'){
@@ -44,7 +48,7 @@ class Account {
 							case 'len':
 								callback({
 									data: null,
-									error: this.text.passwordRequirements
+									error: text.passwordRequirements
 								})
 								breakLoop = true
 								break;
@@ -54,7 +58,7 @@ class Account {
 							case 'len':
 								callback({
 									data: null,
-									error: this.text.loginRequirements
+									error: text.loginRequirements
 								})
 								breakLoop = true
 								break;
@@ -64,7 +68,7 @@ class Account {
 							case 'isemail':
 								callback({
 									data: null,
-									error: this.text.emailRequirements
+									error: text.emailRequirements
 								})
 								breakLoop = true
 								break;
@@ -76,30 +80,27 @@ class Account {
 				if(!breakLoop)
 					callback({
 						data: null, 
-						error: this.text.unexpectedError
+						error: text.unexpectedError
 					})
 			})
 	}
 
 	activate(link){
-		const sugar = require('./sugar')
-		const table = `${this.database.sequelize.models.Users.getTableName()}`
-		this.database.sequelize.query(`UPDATE ${table} SET active = true WHERE MD5(${sugar.hashConfig}) = '${link}' AND active = false RETURNING email, login, password;`)
+		const table = `${database.sequelize.models.Users.getTableName()}`
+		database.sequelize.query(`UPDATE ${table} SET active = true WHERE MD5(${sugar.hashConfig}) = '${link}' AND active = false RETURNING email, login, password;`)
 	}
 
 	checkResetKey(key, callback){
-		const sugar = require('./sugar')
-		const table = `${this.database.sequelize.models.Users.getTableName()}`
-		this.database.sequelize.query(`SELECT email FROM ${table} WHERE MD5(${sugar.hashConfig}) = '${key}' AND active = true`)
+		const table = `${database.sequelize.models.Users.getTableName()}`
+		database.sequelize.query(`SELECT email FROM ${table} WHERE MD5(${sugar.hashConfig}) = '${key}' AND active = true`)
 		.then(([results, metadata])=> {
 			((metadata.rowCount > 0) ? callback(true) : callback(false))
 		})
 	}
 
 	resetLink(email, callback){
-		const sugar = require('./sugar')
-		const table = `${this.database.sequelize.models.Users.getTableName()}`
-		this.database.sequelize.query(`SELECT MD5(${sugar.hashConfig}) as link FROM ${table} WHERE email = '${email}'`)
+		const table = `${database.sequelize.models.Users.getTableName()}`
+		database.sequelize.query(`SELECT MD5(${sugar.hashConfig}) as link FROM ${table} WHERE email = '${email}'`)
 		.then(([results, metadata]) => {
 			if(metadata.rowCount > 0){
 				const _email = require('./email')
@@ -111,21 +112,20 @@ class Account {
 
 	setPassword(password, confirmPassword, key, callback){
 		if(password === confirmPassword){
-			const sugar = require('./sugar')
-			this.database.sequelize.models.Users.update(
+			database.sequelize.models.Users.update(
 				{ password: password.replace(' ','') },
-				{ where: { password: this.database.Sequelize.where(
-					this.database.Sequelize.fn('MD5', 
-						this.database.Sequelize.fn('concat', 
-							this.database.Sequelize.col('id'), 
-							this.database.Sequelize.col('login'),
-							this.database.Sequelize.col('password'),
+				{ where: { password: database.Sequelize.where(
+					database.Sequelize.fn('MD5', 
+						database.Sequelize.fn('concat', 
+							database.Sequelize.col('id'), 
+							database.Sequelize.col('login'),
+							database.Sequelize.col('password'),
 							sugar.activationLinkSugar
-						)), { [this.database.Sequelize.Op.eq]: key }
+						)), { [database.Sequelize.Op.eq]: key }
 					)} }
 			)
 			.then(data => callback(text.passwordChanged, null))
-			.catch(this.database.Sequelize.ValidationError, (err)=>{
+			.catch(database.Sequelize.ValidationError, (err)=>{
 				callback(null, text.passwordRequirements)
 			})
 			.catch(err => {
@@ -138,25 +138,33 @@ class Account {
 	}
 
 	login(_object, callback){
-		const sugar = require('./sugar')
-		this.database.sequelize.models.Users.findOne({
+		const md5 = require('MD5');
+		database.sequelize.models.Users.findOne({
 			where: {
-				[this.database.Sequelize.Op.or] : [{email: loginOrEmail}, {login: loginOrEmail}],
-				password: `password`,
+				[database.Sequelize.Op.or] : [{email: _object.login}, {login: _object.login}],
+				password: md5(_object.password + sugar.activationLinkSugar),
 				active: true
 			}
 		})
 		.then(data => {
-			console.log(data)
-			callback('', '')
-		})
-		.catch(err=>{
-			console.log(err)
+			const token = auth.getToken({
+				payload: {
+					id: data.dataValues.id
+					}	
+			})
 			callback({
-				data: null,
-				error: ""
+				data: token,
+				error: null
 			})
 		})
+		.catch(err=>{
+			callback({
+				data: null,
+				error: text.wrongCredentials
+			})
+		})
+		
+
 		
 	}
 

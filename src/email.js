@@ -13,7 +13,7 @@ function sendActivationLink(_object){
 	const md5 = require('md5');
 	const sugar = require('./sugar')
 	const _md5 = md5(_object.id+_object.login+_object.password+sugar.activationLinkSugar)
-	const link = `http://192.168.8.186:3001/activate/${_md5}`
+	const link = `http://localhost:3001/activate/${_md5}`
 	let mailOptions = {
 	  from: 'patrykslu1@gmail.com',
 	  to: _object.email,
@@ -36,7 +36,7 @@ function accountResetLink(address, link){
 	  from: 'patrykslu1@gmail.com',
 	  to: address,
 	  subject: 'Fetish - zmiana hasła',
-	  html: `http://192.168.8.186:3001/resetconfirmed/${link}`
+	  html: `http://localhost:3001/resetconfirmed/${link}`
 	};
 
 

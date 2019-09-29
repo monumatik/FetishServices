@@ -7,8 +7,7 @@ var Database = require('./app')
 var Database = new Database()
 Database.syncDatabase()
 var Account = require('./account')
-const Text = require('./text')
-Account = new Account(Database, Text)
+Account = new Account(Database)
 var email = require('./email')
 
 var corsOptions = {
@@ -40,10 +39,9 @@ app.post('/login', function(req, res) {
 		password: req.body.password
 	},
 	(_object)=>{
-		if(_object.data)
 		res.send({
 			data: _object.data,
-			result: _object.error
+			error: _object.error
 		})
 	})
 })
