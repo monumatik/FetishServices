@@ -8,7 +8,7 @@ var Database = new Database()
 Database.syncDatabase()
 var Account = require('./account')
 Account = new Account(Database)
-var email = require('./email')
+
 
 var corsOptions = {
   origin: '*',
@@ -18,6 +18,7 @@ var corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json())
 
+
 app.post('/register', function (req, res) {
 	Account.createAccount({
 		login: req.body.login, 
@@ -25,7 +26,6 @@ app.post('/register', function (req, res) {
 		email: req.body.email
 	},
 	(_object)=>{
-		_object.data !== null ? email.sendActivationLink(_object.account) : {};
 		res.send({
 			data: _object.data, 
 			error: _object.error
@@ -34,16 +34,22 @@ app.post('/register', function (req, res) {
 })
 
 app.post('/login', function(req, res) {
-	Account.login({
-		login: req.body.login, 
-		password: req.body.password
-	},
-	(_object)=>{
-		res.send({
-			data: _object.data,
-			error: _object.error
+	if('login' in req.body && 'password' in req.body){
+		Account.login({
+			login: req.body.login, 
+			password: req.body.password
+		},
+		(_object)=>{
+			res.send({
+				data: _object.data,
+				error: _object.error
+			})
 		})
-	})
+	}else{
+		res.status(400)
+		res.end();
+	}
+	
 })
 
 app.get('/activate/:key', function (req, res) {
@@ -59,29 +65,56 @@ app.post('/resetlink', function (req, res) {
 })
 
 app.get('/resetconfirmed/:key', function (req, res) {
-	let Account = require('./account')
-	Account = new Account(Database)
-	Account.checkResetKey(req.params.key, (verify)=>{
-		if(verify){
-			let html = require('./public/resetPassword')
-			html = html(req.params.key)
-			res.send(html)
-		}
-		else{
-			res.end()
-		}
-	})
+	if('key' in req.params){
+		Account.checkResetKey(req.params.key, (verify)=>{
+			if(verify){
+				let html = require('./public/resetPassword')
+				html = html(req.params.key)
+				res.send(html)
+			}
+			else{
+				res.status=401
+				res.end()
+			}
+		})
+	}else{
+		res.status=400
+		res.end()
+	}
 })
 
-app.post('/resetPassword/:key', function (req, res) { //dla formularza z nowym hasłem
-	let Account = require('./account')
-	Account = new Account(Database)
-	Account.setPassword(req.body.password, req.body.confirmPassword, req.params.key, (data, error)=>{
-		res.send({
-			data: data,
-			error: error
-		})	
-	})
+app.post('/resetPassword/:key', function (req, res) {
+	if('password' in req.body && 'confirmPassword' in req.body && 'key' in req.params){
+		Account.setPassword(req.body.password, req.body.confirmPassword, req.params.key, (data, error)=>{
+			res.send({
+				data: data,
+				error: error
+			})	
+		})
+	}else{
+		res.status = 400
+		res.end();
+	}
+	
 })
 
+app.post('/getFetish', function (req, res) {
+	if('token' in req.body){
+		Account.getFetish({
+			token: req.body.token
+		},
+		(_object)=>{
+			res.send({
+				data: _object.data,
+				error: _object.error
+			})
+		})
+	}else{
+		res.status = 400
+		res.end();
+	}
+})
+
+app.use(express.static(path.join(__dirname, 'public')));
+console.log(path.join(__dirname, 'public'))
 app.listen(3001, '0.0.0.0')

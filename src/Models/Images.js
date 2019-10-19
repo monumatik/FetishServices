@@ -10,9 +10,9 @@ var userSync = (Sequelize, sequelize)=>{
       autoIncrement: true,
       primaryKey: true
     },
-    image: {
-      type: Sequelize.BLOB,
-      allowNull: true,
+    url: {
+      type: Sequelize.TEXT,
+      allowNull: false,
     }
   }, {
     sequelize,

@@ -2,6 +2,7 @@ var database;
 const text = require('./text')
 const sugar = require('./sugar')
 const auth = require('./auth')
+const email = require('./email')
 
 
 class Account {
@@ -17,6 +18,12 @@ class Account {
 				email: user.email.replace(' ','')
 			})
 			.then((data) => {
+				data.dataValues !== null ? email.sendActivationLink({	
+					id: data.dataValues.id,
+					login: data.dataValues.login,
+					password: data.dataValues.password,
+					email: data.dataValues.email,
+				}) : {};
 				callback({
 					data: text.accountCreated,
 					error: null,
@@ -31,13 +38,13 @@ class Account {
 			.catch(database.Sequelize.UniqueConstraintError, (err)=>{
 				switch(err.parent.constraint.toLowerCase()){
 					case 'users_email_key':
-						callback(null, text.emailExists)
+						callback({data: null, error: text.emailExists})
 						break;
 					case 'users_login_key':
-						callback(null, text.userExists)
+						callback({data: null, error: text.userExists})
 						break;
 					default:
-						callback(null, text.unexpectedError)
+						callback({data: null, error: text.unexpectedError})
 				}
 			})
 			.catch(database.Sequelize.ValidationError, (err)=>{
@@ -142,15 +149,15 @@ class Account {
 		database.sequelize.models.Users.findOne({
 			where: {
 				[database.Sequelize.Op.or] : [{email: _object.login}, {login: _object.login}],
-				password: md5(_object.password + sugar.activationLinkSugar),
+				password: md5(`${_object.password}${sugar.activationLinkSugar}`),
 				active: true
 			}
 		})
 		.then(data => {
 			const token = auth.getToken({
-				payload: {
-					id: data.dataValues.id
-					}	
+				payload:{
+						id: data.dataValues.id
+						}	
 			})
 			callback({
 				data: token,
@@ -163,8 +170,47 @@ class Account {
 				error: text.wrongCredentials
 			})
 		})
-		
+	}
 
+	getFetish(_object, callback){
+		const Auth = auth.validateToken(_object)
+		if(Auth.payload !== null){
+			database.sequelize.models.Shows.findOne({
+				where: {
+					UserId: Auth.payload.id
+				}
+			})
+			.then(data => {
+				Promise.all([
+					database.sequelize.models.Images.findAll({
+						where: {
+							UserId: data.dataValues.UserIdToShow
+						}
+					}),
+					database.sequelize.models.Users.findOne({
+						where: {
+							id: data.dataValues.UserIdToShow
+						}
+					})
+				])
+				.then(data=>{
+					let images=[]
+					console.log(data[0])
+					data[0].forEach(value=>images.push(value.url))
+					callback({
+						data: {
+							login: data[1].dataValues.login,
+							images: images
+						},
+						error: null
+					})
+				})
+			})
+			
+		}else{
+			res.status(400)
+			res.end()
+		}
 		
 	}
 

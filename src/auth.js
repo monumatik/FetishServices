@@ -9,14 +9,13 @@ class Authorization {
 
 	static validateToken(_obj){
 		var payload = null
-		var error = null
+		var _error = null
 		try{
 			payload = jwt.verify(_obj.token, secret)
 		}catch(err){
-			error = err
+			_error = err
 		}	
-	
-		return { payload: payload, error: err }
+		return { payload: payload, error: _error }
 	}
 }
 
